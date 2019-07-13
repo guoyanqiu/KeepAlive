@@ -48,9 +48,9 @@ public class OnePixelActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("OnePixelActivity","OnePixelActivity已经启动");
+        Log.e("OnePixelActivity","OnePixelActivity已经启动");
         if (DeviceUtils.isScreenOn(this)) {
-            Log.i("OnePixelActivity","OnePixelActivity 屏幕打开关闭自己");
+            Log.e("OnePixelActivity","OnePixelActivity 屏幕打开关闭自己");
             finish();
         }
     }
@@ -58,6 +58,6 @@ public class OnePixelActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i("OnePixelActivity","OnePixelActivity已经销毁");
+        Log.e("OnePixelActivity","OnePixelActivity已经销毁");
     }
 }

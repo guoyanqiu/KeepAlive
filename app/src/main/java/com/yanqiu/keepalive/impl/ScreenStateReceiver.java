@@ -23,19 +23,19 @@ public class ScreenStateReceiver extends BroadcastReceiver {
     private List<ScreenStateListener> screenStateListeners = null;
     @Override
     public void onReceive(final Context context, Intent intent) {
-        Log.i("ScreenStateReceiver", "---屏幕锁屏监听---");
+        Log.e("ScreenStateReceiver", "---屏幕锁屏监听---");
         String action = intent.getAction();
         if (TextUtils.isEmpty(action)) {
             return;
         }
         if (action.equals(Intent.ACTION_SCREEN_OFF)) {
-            Log.i("ScreenStateReceiver", "---屏幕关闭---");
+            Log.e("ScreenStateReceiver", "---屏幕关闭---");
             isScreenOn = false;
             startOnePixelActivity(context);
 
         } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
             isScreenOn = true;
-            Log.i("ScreenStateReceiver", "---屏幕打开---");
+            Log.e("ScreenStateReceiver", "---屏幕打开---");
             if(pendingIntent!=null){
                 pendingIntent.cancel();
             }
