@@ -1,14 +1,10 @@
 package com.yanqiu.keepalive.impl;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -18,13 +14,12 @@ import com.yanqiu.keepalive.R;
 import com.yanqiu.keepalive.utils.DeviceUtils;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 /**
  * 播放无声音乐，来保持进程包活
  */
 //播放无声音乐，来保持进程保活
-public class NonVoicePlayService extends Service {
+public class KeepAliveService extends Service {
     private boolean isScreenON = true;//控制暂停
     private MediaPlayer mediaPlayer;
     //锁屏广播监听
@@ -32,16 +27,26 @@ public class NonVoicePlayService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("NonVoicePlayService", "---NonVoicePlayService 启动---");
+        Log.e("KeepAliveService", "---KeepAliveService 启动---");
         //注册锁屏广播
         registerScreenStateReceiver();
         //初始化播放器
         initMediaPlayer();
-        //开启前台
-        startForeground();
+        //开启前台Service
+        startForeground(this);
+        //start HideNotifactionService
+        startHideNotificationService();
         return START_STICKY;
     }
 
+    private void startHideNotificationService(){
+        try {
+//            if(Build.VERSION.SDK_INT < 25){
+                startService(new Intent(this, HideNotificationService.class));
+//            }
+        } catch (Exception e) {
+        }
+    }
     @Override
     public void onCreate() {
         super.onCreate();
@@ -57,44 +62,17 @@ public class NonVoicePlayService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e("NonVoicePlayService", "---NonVoicePlayService onDestroy---");
+        Log.e("KeepAliveService", "---KeepAliveService onDestroy---");
         if(screenStateReceiver!=null){
             unregisterReceiver(screenStateReceiver);
         }
     }
 
-    private void startForeground(){
-        Intent intent = new Intent(getApplicationContext(),NotificationClickReceiver.class);
-        intent.setAction(NotificationClickReceiver.CLICK_NOTIFICATION);
-
-        Notification notification = null;
-        String packageName = getPackageName();
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        if (Build.VERSION.SDK_INT >= 26) {
-            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            if(manager!=null){
-                NotificationChannel channel = new NotificationChannel(packageName, packageName, NotificationManager.IMPORTANCE_HIGH);
-                channel.enableVibration(false);
-                channel.enableLights(false);
-                channel.enableVibration(false);
-                channel.setVibrationPattern(new long[]{0});
-                channel.setSound(null, null);
-                manager.createNotificationChannel(channel);
-            }
-            notification= new Notification.Builder(this, packageName)
-                    .setContentTitle("1")
-                    .setContentText("2")
-                    .setAutoCancel(true).setContentIntent(pendingIntent).build();
-        } else {
-            notification= new NotificationCompat.Builder(this, packageName)
-                    .setContentTitle("1")
-                    .setContentText("2")
-                    .setAutoCancel(true)
-                    .setVibrate(new long[]{0})
-                    .setContentIntent(pendingIntent).build();
-        }
-
-        startForeground(13691, notification);
+    public static  void startForeground(Service service){
+        Intent intent = new Intent(service.getApplicationContext(), com.fanjun.keeplive.receiver.NotificationClickReceiver.class);
+        intent.setAction(com.fanjun.keeplive.receiver.NotificationClickReceiver.CLICK_NOTIFICATION);
+        Notification notification = NotificationUtils.createNotification(service, "1", "2", R.drawable.ic_launcher_background, intent);
+        service.startForeground(13691, notification);
     }
 
     private void registerScreenStateReceiver(){
@@ -149,4 +127,5 @@ public class NonVoicePlayService extends Service {
             mediaPlayer.pause();
         }
     }
+
 }

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.fanjun.keeplive.KeepLive;
 
 /**
  * 点击通知栏的时候关闭
